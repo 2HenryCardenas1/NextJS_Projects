@@ -1,45 +1,105 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
-  let message = "Exsiste la tarea";
-  const task = await prisma.task.findUnique({
-    where: {
-      id: Number(params.id),
-    },
-  });
-
-  if (!task) {
-    message = "No existe la tarea";
-  }
-
-  return NextResponse.json({ message, task });
-}
-
-export async function PUT(request, { params }) {
-  const data = await request.json();
-
-  const updatedTask = await prisma.task.update({
-    where: {
-      id: Number(params.id),
-    },
-    data: data,
-  });
-
-  return NextResponse.json({ message: "Tarea Actualizada", updatedTask });
-}
-
-export async function DELETE(request, { params }) {
-  let message = "Tarea eliminada";
   try {
-    await prisma.task.delete({
+    const task = await prisma.task.findUnique({
       where: {
         id: Number(params.id),
       },
     });
 
-    return NextResponse.json({ message });
+    if (!task) {
+      return NextResponse.json({ message: "Note not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(task);
   } catch (error) {
-    return NextResponse.json({ message: error.meta.cause });
+    if (error instanceof Error) {
+      return NextResponse.json(
+        {
+          message: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    const data = await request.json();
+
+    const updatedTask = await prisma.task.update({
+      where: {
+        id: Number(params.id),
+      },
+      data: data,
+    });
+
+    return NextResponse.json(updatedTask);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json(
+          {
+            message: "Note not found",
+          },
+          {
+            status: 404,
+          }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          message: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const taskDelete = await prisma.task.delete({
+      where: {
+        id: Number(params.id),
+      },
+    });
+
+    if (!taskDelete) {
+      return NextResponse.json({ message: "Note not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(taskDelete);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json(
+          {
+            message: "Note not found",
+          },
+          {
+            status: 404,
+          }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          message: error.meta.cause,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
   }
 }
