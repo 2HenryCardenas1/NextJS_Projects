@@ -31,7 +31,9 @@ export async function GetTasks() {
 
     const result = await rest.json();
 
-    console.log("API", result);
+    if (!rest.ok) {
+      throw result;
+    }
 
     return result;
   } catch (error) {
