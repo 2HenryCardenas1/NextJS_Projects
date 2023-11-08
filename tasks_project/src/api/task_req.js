@@ -68,3 +68,20 @@ export async function UpdateTask(id, task) {
     throw error;
   }
 }
+
+export async function DeleteTask(id) {
+  const rest = await fetch(`${URL_API}/api/tasks/${id}/`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await rest.json();
+
+  if (!rest.ok) {
+    throw result;
+  }
+
+  return result;
+}
