@@ -1,33 +1,53 @@
 "use client"; // <-- omit this line if you want to use this file on the server
 
-import { CreateTask } from "@/api/task";
+import { CreateTask, GetTask, UpdateTask } from "@/api/task_req";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function NewPage() {
+export default function NewPage({ params }) {
   const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [task, setTask] = useState({});
+  const [status, setStatus] = useState(false);
+
+  useEffect(() => {
+    if (params.id) {
+      GetTask(params.id).then((task) => {
+        setTask(task);
+        setTitle(task.title);
+        setDescription(task.description);
+        setStatus(task.completed);
+      });
+    }
+  }, [params]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const title = e.target.title.value;
-    const description = e.target.description.value;
 
-    try {
-      await CreateTask({ title, description }).then((res) => {
-        if (res !== undefined) {
-          router.push("/");
-        }
+    if (params.id) {
+      await UpdateTask(params.id, {
+        title,
+        description,
+        completed: status,
       });
-    } catch (error) {
-      router.push("/new");
-      throw error;
+    } else {
+      await CreateTask({ title, description });
     }
+    router.refresh();
+    router.push("/");
   };
 
   return (
     <div className="flex flex-wrap justify-center items-center flex-col gap-5 mx-5 h-screen">
-      <h1 className="text-5xl text-center font-bold">Create you new task</h1>
+      <h1 className="text-5xl text-center font-bold">
+        {params.id ? "Edit" : "Create"} Task
+      </h1>
 
       <p className="text-lg font-light">
-        Create the new task to change the world !
+        {params.id
+          ? "Edit the task that will change the world !"
+          : "Create the new task that will change the world !"}
       </p>
 
       <form
@@ -35,12 +55,27 @@ export default function NewPage() {
         onSubmit={handleSubmit}
       >
         <div className="flex flex-col">
+          <div
+            className="text-right hover:cursor-pointer"
+            onClick={() => setStatus(!status)}
+          >
+            <span className="text-sm text-gray-200 ">
+              {status ? "Completed" : "Pending"}
+            </span>
+            <span
+              className={`inline-block ml-2 px-2 py-1 rounded-full ${
+                status ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+          </div>
           <label htmlFor="title">Title</label>
           <input
             id="title"
             className="border border-gray-400 p-2 rounded text-black"
             type="text"
             placeholder="Title for your task"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
           />
         </div>
         <div className="flex flex-col">
@@ -50,6 +85,8 @@ export default function NewPage() {
             className="border border-gray-400 p-2 rounded text-black"
             placeholder="Description for your task"
             rows={5}
+            onChange={(e) => setDescription(e.target.value)}
+            value={description}
           />
         </div>
         <button
