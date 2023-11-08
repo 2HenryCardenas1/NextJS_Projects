@@ -21,7 +21,27 @@ export async function CreateTask(task) {
 }
 
 export async function GetTasks() {
-  const rest = await fetch(`${URL_API}/api/tasks`);
+  try {
+    const rest = await fetch(`${URL_API}/api/tasks`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await rest.json();
+
+    console.log("API", result);
+
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function GetTask(id) {
+  const rest = await fetch(`${URL_API}/api/tasks/${id}`);
 
   const result = await rest.json();
 
