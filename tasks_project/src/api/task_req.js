@@ -51,7 +51,7 @@ export async function GetTask(id) {
 
 export async function UpdateTask(id, task) {
   try {
-    const rest = await fetch(`${URL_API}/api/tasks/${id}`, {
+    const rest = await fetch(`${URL_API}/api/tasks/${id}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
