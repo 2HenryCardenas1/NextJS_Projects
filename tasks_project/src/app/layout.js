@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import { inter } from "@/fonts/fonts";
 import "./globals.css";
 
@@ -10,6 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={inter.className}>
+        <Navbar />
         {children}
       </body>
     </html>
