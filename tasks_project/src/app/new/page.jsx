@@ -1,6 +1,7 @@
 "use client"; // <-- omit this line if you want to use this file on the server
 
 import { CreateTask, GetTask, UpdateTask } from "@/api/task_req";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -96,6 +97,11 @@ export default function NewPage({ params }) {
           Submit
         </button>
       </form>
+      <Link href={"/"}>
+        <button className="bg-red-500 text-white py-2 px-4 rounded">
+          Cancel
+        </button>
+      </Link>
     </div>
   );
 }
